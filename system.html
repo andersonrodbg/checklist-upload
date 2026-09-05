@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check List Upload | Lançamento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="img/logomasut.png" type="image/x-icon">
+</head>
+<body>
+    <main class="system-shell">
+        <header class="system-header">
+            <div class="system-brand">
+                <div class="brand-badge small-badge">✓</div>
+                <div>
+                    <span class="eyebrow light-eyebrow">Check List Upload</span>
+                    <h1>Lançamento de carreta</h1>
+                </div>
+            </div>
+            <a class="logout-link" href="index.html">Sair da conta</a>
+        </header>
+
+        <section class="system-content">
+            <div class="system-intro">
+                <div>
+                    <span class="eyebrow">Novo registro</span>
+                    <h2>Fotos e placa</h2>
+                    <p>Informe a placa da carreta e anexe as fotos do checklist.</p>
+                </div>
+                <div class="step-indicator"><span>01</span> Registro de entrada</div>
+            </div>
+
+            <form id="uploadForm" class="upload-form" novalidate>
+                <div class="form-column">
+                    <label for="plate">Placa da carreta</label>
+                    <input id="plate" name="plate" type="text" placeholder="ABC-1D23" maxlength="8" autocomplete="off" required>
+                    <span class="field-hint">Use o formato da placa do veículo.</span>
+
+                    <label for="notes">Observações <span>(opcional)</span></label>
+                    <textarea id="notes" name="notes" rows="5" placeholder="Adicione uma observação sobre o checklist..."></textarea>
+
+                    <button type="submit" class="submit-button">Salvar lançamento</button>
+                    <p id="uploadStatus" class="status-message" aria-live="polite"></p>
+                </div>
+
+                <div class="photo-column">
+                    <label for="photos">Fotos do checklist</label>
+                    <label class="dropzone" for="photos">
+                        <span class="upload-icon">+</span>
+                        <strong>Adicionar fotos</strong>
+                        <span>JPG ou PNG · até 10 imagens</span>
+                        <input id="photos" name="photos" type="file" accept="image/jpeg,image/png" multiple required>
+                    </label>
+                    <div id="photoPreview" class="photo-preview" aria-live="polite"></div>
+                    <p id="photoCount" class="photo-count">Nenhuma foto selecionada</p>
+                </div>
+            </form>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
