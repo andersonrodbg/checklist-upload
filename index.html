@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check List Upload</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="img/logomasut.png" type="imagem/x-icon">
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="brand-panel" aria-label="Informações da plataforma">
+        <div class="brand-badge">✓</div>
+        <h1>Check List Upload</h1>
+      </section>
+
+      <section class="login-card" aria-label="Área de login">
+        <div class="card-header">
+          <span class="eyebrow">Acesso</span>
+          <h2>Entrar</h2>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <label for="user">Usuário</label>
+          <input id="user" name="user" type="text" placeholder="usuário" autocomplete="username" required />
+
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required />
+
+          <div class="options">
+            <label class="remember">
+              <input type="checkbox" />
+              <span>Lembrar-me</span>
+            </label>
+            <a href="#">Esqueceu a senha?</a>
+          </div>
+
+          <button type="submit">Entrar</button>
+        </form>
+
+        <p id="statusMessage" class="status-message" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
