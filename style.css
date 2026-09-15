@@ -16,6 +16,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -260,6 +264,73 @@ button:hover {
   padding: 42px 48px 50px;
 }
 
+.action-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 38px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.action-option {
+  padding: 14px 16px;
+  border: 1px solid rgba(29, 155, 240, 0.28);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: none;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.action-option.active,
+.action-option:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.consultation-panel {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.consultation-panel h2 {
+  margin: 8px 0 6px;
+}
+
+.consultation-panel p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.consultation-fields {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.consultation-fields label {
+  grid-column: 1 / -1;
+  margin: 0 -0px -8px;
+}
+
+.consultation-fields input {
+  margin: 0;
+}
+
+.consultation-fields button {
+  padding: 16px 28px;
+}
+
+.consultation-panel .status-message {
+  margin-bottom: 0;
+}
+
 .system-intro {
   display: flex;
   align-items: flex-end;
@@ -463,6 +534,18 @@ button:hover {
   .upload-form {
     grid-template-columns: 1fr;
     gap: 28px;
+  }
+
+  .action-menu {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .consultation-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .consultation-fields button {
+    width: 100%;
   }
 
   .photo-preview {

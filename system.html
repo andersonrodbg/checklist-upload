@@ -24,11 +24,30 @@
         </header>
 
         <section class="system-content">
+            <nav class="action-menu" aria-label="Opções de lançamento">
+                <button type="button" class="action-option" data-action="consult-checklist">Consultar checklist</button>
+                <button type="button" class="action-option active" data-action="send-checklist">Enviar checklist</button>
+                <button type="button" class="action-option" data-action="consult-conferencia">Consultar conferencia</button>
+                <button type="button" class="action-option" data-action="send-conferencia">Enviar conferencia</button>
+            </nav>
+
+            <section id="consultationPanel" class="consultation-panel" hidden>
+                <span class="eyebrow">Consulta</span>
+                <h2 id="consultationTitle">Consultar checklist</h2>
+                <p>Informe a placa para consultar os registros disponíveis.</p>
+                <div class="consultation-fields">
+                    <label for="consultationPlate">Placa da carreta</label>
+                    <input id="consultationPlate" type="text" placeholder="ABC-1D23" maxlength="8" autocomplete="off">
+                    <button type="button" id="consultationButton">Consultar</button>
+                </div>
+                <p id="consultationStatus" class="status-message" aria-live="polite"></p>
+            </section>
+
             <div class="system-intro">
                 <div>
                     <span class="eyebrow">Novo registro</span>
-                    <h2>Fotos e placa</h2>
-                    <p>Informe a placa da carreta e anexe as fotos do checklist.</p>
+                    <h2 id="uploadTitle">Fotos e placa</h2>
+                    <p id="uploadDescription">Informe a placa da carreta e anexe as fotos do checklist.</p>
                 </div>
                 <div class="step-indicator"><span>01</span> Registro de entrada</div>
             </div>
@@ -47,7 +66,7 @@
                 </div>
 
                 <div class="photo-column">
-                    <label for="photos">Fotos do checklist</label>
+                    <label for="photos" id="photoLabel">Fotos do checklist</label>
                     <label class="dropzone" for="photos">
                         <span class="upload-icon">+</span>
                         <strong>Adicionar fotos</strong>
