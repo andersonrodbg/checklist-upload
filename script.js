@@ -1,541 +1,406 @@
+
 const API_URL = 'http://localhost:8080';
+const $ = (id) => document.getElementById(id);
 
-// ==============================
-// LOGIN
-// ==============================
-
-const loginForm = document.getElementById('loginForm');
-
-if (loginForm) {
-
-  const statusMessage = document.getElementById('statusMessage');
-
-  loginForm.addEventListener('submit', (event) => {
-
+// LOGIN (apenas visual, sem autenticação no backend)
+if ($('loginForm')) {
+  $('loginForm').addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const user = document.getElementById('user').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const user = $('user').value.trim();
+    const password = $('password').value.trim();
+    const status = $('statusMessage');
 
-    if (!user || !password) {
-      statusMessage.textContent =
-        'Preencha o usuário e a senha para continuar.';
+    status.textContent = user && password
+      ? `Bem-vindo(a), ${user}! Login realizado na interface.`
+      : 'Preencha o usuário e a senha para continuar.';
 
-      statusMessage.style.color = '#d94c4c';
-      return;
-    }
+    status.style.color = user && password ? '#1ea672' : '#d94c4c';
 
-    statusMessage.textContent =
-      `Bem-vindo(a), ${user}! Login realizado com sucesso.`;
-
-    statusMessage.style.color = '#1ea672';
-
-    loginForm.reset();
+    if (user && password) $('loginForm').reset();
   });
 }
 
+// CHECKLIST E CONFERÊNCIA
+if ($('uploadForm')) {
+  const options = document.querySelectorAll('[data-action]');
+  const form = $('uploadForm');
+  const photoInput = $('photos');
+  const preview = $('photoPreview');
 
-// ==============================
-// CHECKLIST / CONFERÊNCIA
-// ==============================
+  const result = document.createElement('div');
+  result.id = 'consultaResultado';
+  result.className = 'consulta-resultado';
+  $('consultationPanel').appendChild(result);
 
-const uploadForm = document.getElementById('uploadForm');
+  let action = 'send-checklist';
+  let files = [];
+  let previewUrls = [];
 
-if (uploadForm) {
+  const isChecklist = () => action.endsWith('checklist');
+  const basePath = () => isChecklist() ? 'checklists' : 'conferencias';
 
-  const actionOptions =
-    document.querySelectorAll('[data-action]');
+  function status(id, message, success = false) {
+    $(id).textContent = message;
+    $(id).style.color = success ? '#1ea672' : '#d94c4c';
+  }
 
-  const consultationPanel =
-    document.getElementById('consultationPanel');
+  // Alternar opções do menu
+  function changeAction(next) {
+    action = next;
 
-  const consultationTitle =
-    document.getElementById('consultationTitle');
+    const consulting = action.startsWith('consult-');
+    const type = isChecklist() ? 'checklist' : 'conferência';
 
-  const consultationButton =
-    document.getElementById('consultationButton');
-
-  const consultationPlate =
-    document.getElementById('consultationPlate');
-
-  const consultationStatus =
-    document.getElementById('consultationStatus');
-
-  const systemIntro =
-    document.querySelector('.system-intro');
-
-  const uploadTitle =
-    document.getElementById('uploadTitle');
-
-  const uploadDescription =
-    document.getElementById('uploadDescription');
-
-  const photoLabel =
-    document.getElementById('photoLabel');
-
-  const photoInput =
-    document.getElementById('photos');
-
-  const photoPreview =
-    document.getElementById('photoPreview');
-
-  const photoCount =
-    document.getElementById('photoCount');
-
-  const uploadStatus =
-    document.getElementById('uploadStatus');
-
-  let selectedFiles = [];
-
-  let currentAction = 'send-checklist';
-
-
-  // ==============================
-  // TEXTOS
-  // ==============================
-
-  const actionLabels = {
-
-    checklist: {
-      title: 'Fotos e placa',
-      description:
-        'Informe a placa da carreta e anexe as fotos do checklist.',
-      photoLabel:
-        'Fotos do checklist'
-    },
-
-    conferencia: {
-      title: 'Fotos e placa',
-      description:
-        'Informe a placa da carreta e anexe as fotos da conferencia.',
-      photoLabel:
-        'Fotos da conferencia'
-    }
-  };
-
-
-  // ==============================
-  // TROCA DE AÇÃO
-  // ==============================
-
-  const showAction = (action) => {
-
-    currentAction = action;
-
-    actionOptions.forEach((option) => {
-
+    options.forEach((option) => {
       option.classList.toggle(
         'active',
         option.dataset.action === action
       );
-
     });
 
-    const isConsultation =
-      action.startsWith('consult-');
+    $('consultationPanel').hidden = !consulting;
+    document.querySelector('.system-intro').hidden = consulting;
+    form.hidden = consulting;
 
-    consultationPanel.hidden =
-      !isConsultation;
+    $('consultationTitle').textContent = `Consultar ${type}`;
+    $('uploadTitle').textContent = 'Fotos e placa';
+    $('uploadDescription').textContent =
+      `Informe a placa e anexe as fotos da ${type}.`;
+    $('photoLabel').textContent = `Fotos da ${type}`;
 
-    systemIntro.hidden =
-      isConsultation;
+    $('consultationStatus').textContent = '';
+    $('uploadStatus').textContent = '';
+    result.replaceChildren();
+  }
 
-    uploadForm.hidden =
-      isConsultation;
-
-
-    if (isConsultation) {
-
-      const type =
-        action.endsWith('checklist')
-          ? 'checklist'
-          : 'conferencia';
-
-      consultationTitle.textContent =
-        `Consultar ${type}`;
-
-      consultationStatus.textContent = '';
-
-      return;
-    }
-
-
-    const type =
-      action.endsWith('checklist')
-        ? 'checklist'
-        : 'conferencia';
-
-    uploadTitle.textContent =
-      actionLabels[type].title;
-
-    uploadDescription.textContent =
-      actionLabels[type].description;
-
-    photoLabel.textContent =
-      actionLabels[type].photoLabel;
-
-    uploadStatus.textContent = '';
-  };
-
-
-  actionOptions.forEach((option) => {
-
+  options.forEach((option) => {
     option.addEventListener('click', () => {
-
-      showAction(option.dataset.action);
-
+      changeAction(option.dataset.action);
     });
-
   });
 
+  // Formatar data e hora
+  function formatDate(value) {
+    if (!value) return ['Não informada', 'Não informada'];
 
-  // ==============================
-  // CONSULTAR
-  // ==============================
+    const match = String(value).match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/
+    );
 
- consultationButton.addEventListener('click', async () => {
-    const plate = consultationPlate.value.trim();
-
-    if (!plate) {
-        consultationStatus.textContent = 'Informe a placa para realizar a consulta.';
-        consultationStatus.style.color = '#d94c4c';
-        return;
+    // LocalDateTime já salvo no horário de Brasília
+    if (match && !/(Z|[+-]\d{2}:\d{2})$/i.test(value)) {
+      return [
+        `${match[3]}/${match[2]}/${match[1]}`,
+        `${match[4]}:${match[5]}`
+      ];
     }
 
-    consultationStatus.textContent = 'Consultando...';
-    consultationStatus.style.color = '#5d6b7b';
+    const date = new Date(value);
 
-    try {
-        const isChecklist = currentAction === 'consult-checklist';
-
-        const endpoint = isChecklist
-            ? `${API_URL}/checklists/placa/${encodeURIComponent(plate)}`
-            : `${API_URL}/conferencias/placa/${encodeURIComponent(plate)}`;
-
-        const response = await fetch(endpoint);
-
-        if (!response.ok) {
-            throw new Error('Erro ao consultar registro.');
-        }
-
-        const registros = await response.json();
-
-        if (registros.length === 0) {
-            consultationStatus.textContent =
-                `Nenhum ${isChecklist ? 'checklist' : 'registro de conferência'} encontrado para a placa ${plate.toUpperCase()}.`;
-
-            consultationStatus.style.color = '#d94c4c';
-
-            mostrarResultadoConsulta(null);
-            return;
-        }
-
-        // O backend já envia o mais recente primeiro
-        const ultimo = registros[0];
-
-        mostrarResultadoConsulta(ultimo);
-
-        consultationStatus.textContent =
-            'Último registro encontrado.';
-        consultationStatus.style.color = '#1ea672';
-
-    } catch (error) {
-        console.error(error);
-
-        consultationStatus.textContent =
-            'Não foi possível realizar a consulta.';
-        consultationStatus.style.color = '#d94c4c';
-    }
-});
-
-function mostrarResultadoConsulta(registro) {
-
-    let resultado = document.getElementById('consultaResultado');
-
-    if (!resultado) {
-        resultado = document.createElement('div');
-        resultado.id = 'consultaResultado';
-        resultado.className = 'consulta-resultado';
-
-        consultationPanel.appendChild(resultado);
+    if (Number.isNaN(date.getTime())) {
+      return ['Não informada', 'Não informada'];
     }
 
-    if (!registro) {
-        resultado.innerHTML = '';
-        return;
-    }
+    const opts = { timeZone: 'America/Sao_Paulo' };
 
-    const dataHora = new Date(registro.dataHora);
-
-    const data = dataHora.toLocaleDateString('pt-BR');
-
-    const hora = dataHora.toLocaleTimeString('pt-BR', {
+    return [
+      date.toLocaleDateString('pt-BR', opts),
+      date.toLocaleTimeString('pt-BR', {
+        ...opts,
         hour: '2-digit',
         minute: '2-digit'
+      })
+    ];
+  }
+
+  // Exibir último registro
+  function showResult(record) {
+    result.replaceChildren();
+
+    if (!record) return;
+
+    const [date, time] = formatDate(record.dataHora);
+
+    const heading = document.createElement('div');
+    heading.className = 'resultado-header';
+    heading.textContent = isChecklist()
+      ? 'ÚLTIMO CHECKLIST'
+      : 'ÚLTIMA CONFERÊNCIA';
+
+    result.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'resultado-grid';
+
+    [
+      ['PLACA', record.placa],
+      ['DATA', date],
+      ['HORA', time]
+    ].forEach(([label, value]) => {
+      const item = document.createElement('div');
+      item.className = 'resultado-item';
+
+      const small = document.createElement('small');
+      small.textContent = label;
+
+      const strong = document.createElement('strong');
+      strong.textContent = value || 'Não informada';
+
+      item.append(small, strong);
+      grid.appendChild(item);
     });
 
-    resultado.innerHTML = `
-        <div class="resultado-header">
-            <span>ÚLTIMO CHECKLIST</span>
-        </div>
+    result.appendChild(grid);
 
-        <div class="resultado-grid">
+    const notes = document.createElement('div');
+    notes.className = 'resultado-observacao';
 
-            <div class="resultado-item">
-                <small>PLACA</small>
-                <strong>${registro.placa}</strong>
-            </div>
+    const label = document.createElement('small');
+    label.textContent = 'OBSERVAÇÕES';
 
-            <div class="resultado-item">
-                <small>DATA</small>
-                <strong>${data}</strong>
-            </div>
+    const paragraph = document.createElement('p');
+    paragraph.textContent =
+      record.observacoes || 'Nenhuma observação registrada.';
 
-            <div class="resultado-item">
-                <small>HORA</small>
-                <strong>${hora}</strong>
-            </div>
+    notes.append(label, paragraph);
+    result.appendChild(notes);
 
-        </div>
+    // Fotos salvas no Cloudinary
+    if (Array.isArray(record.fotos) && record.fotos.length) {
+      const gallery = document.createElement('div');
+      gallery.className = 'galeria-checklist';
 
-        <div class="resultado-observacao">
-            <small>OBSERVAÇÕES</small>
-            <p>${registro.observacoes || 'Nenhuma observação registrada.'}</p>
-        </div>
-    `;
-}
+      const title = document.createElement('h3');
+      title.textContent = 'Fotos do checklist';
+      gallery.appendChild(title);
 
-  // ==============================
-  // FOTOS
-  // ==============================
+      record.fotos.forEach((foto, index) => {
+        if (!foto.url ||
+            !foto.url.startsWith('https://res.cloudinary.com/')) {
+          return;
+        }
 
-  const renderPhotos = () => {
+        const link = document.createElement('a');
+        link.href = foto.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
 
-    photoPreview.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = foto.url;
+        img.alt = `Foto ${index + 1} do checklist`;
+        img.loading = 'lazy';
 
+        link.appendChild(img);
+        gallery.appendChild(link);
+      });
 
-    selectedFiles.forEach((file, index) => {
+      result.appendChild(gallery);
+    }
+  }
 
-      const item =
-        document.createElement('div');
+  // Consultar placa no backend
+  $('consultationButton').addEventListener('click', async () => {
+    const plate = $('consultationPlate')
+      .value.trim().toUpperCase().replace('-', '');
 
-      item.className =
-        'preview-item';
+    if (!plate) {
+      return status('consultationStatus', 'Informe a placa.');
+    }
 
+    result.replaceChildren();
+    $('consultationStatus').textContent = 'Consultando...';
 
-      const image =
-        document.createElement('img');
+    try {
+      const response = await fetch(
+        `${API_URL}/${basePath()}/placa/${encodeURIComponent(plate)}`
+      );
 
-      image.src =
-        URL.createObjectURL(file);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      image.alt =
-        `Pré-visualização da foto ${index + 1}`;
+      const records = await response.json();
 
+      if (!Array.isArray(records)) {
+        throw new Error('Resposta inesperada da API.');
+      }
 
-      const button =
-        document.createElement('button');
+      // Mais recente primeiro
+      records.sort((a, b) =>
+        (b.dataHora || '').localeCompare(a.dataHora || '') ||
+        (b.id || 0) - (a.id || 0)
+      );
 
-      button.type = 'button';
+      showResult(records[0]);
 
-      button.className =
-        'remove-photo';
+      status(
+        'consultationStatus',
+        records.length
+          ? 'Último registro encontrado.'
+          : 'Nenhum registro encontrado.',
+        records.length > 0
+      );
 
-      button.textContent = '×';
+    } catch (error) {
+      console.error(error);
+      status(
+        'consultationStatus',
+        'Erro ao consultar. Verifique se o backend está ligado.'
+      );
+    }
+  });
 
-      button.setAttribute(
+  // Pré-visualização das fotos
+  function renderPhotos() {
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    previewUrls = [];
+    preview.replaceChildren();
+
+    files.forEach((file, index) => {
+      const item = document.createElement('div');
+      item.className = 'preview-item';
+
+      const image = document.createElement('img');
+      const url = URL.createObjectURL(file);
+      previewUrls.push(url);
+
+      image.src = url;
+      image.alt = `Prévia da foto ${index + 1}`;
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-photo';
+      remove.textContent = '×';
+      remove.setAttribute(
         'aria-label',
         `Remover foto ${index + 1}`
       );
 
+      remove.addEventListener('click', () => {
+        files.splice(index, 1);
+        renderPhotos();
+      });
 
-      button.addEventListener(
-        'click',
-        () => {
-
-          selectedFiles.splice(index, 1);
-
-          renderPhotos();
-
-        }
-      );
-
-
-      item.appendChild(image);
-
-      item.appendChild(button);
-
-      photoPreview.appendChild(item);
-
+      item.append(image, remove);
+      preview.appendChild(item);
     });
 
+    $('photoCount').textContent = files.length
+      ? `${files.length} foto(s) selecionada(s)`
+      : 'Nenhuma foto selecionada';
+  }
 
-    photoCount.textContent =
-      selectedFiles.length === 0
-        ? 'Nenhuma foto selecionada'
-        : `${selectedFiles.length} foto${
-            selectedFiles.length > 1 ? 's' : ''
-          } selecionada${
-            selectedFiles.length > 1 ? 's' : ''
-          }`;
-  };
+  photoInput.addEventListener('change', () => {
+    const chosen = Array.from(photoInput.files);
 
+    if (chosen.length > 10) {
+      status(
+        'uploadStatus',
+        'Limite de 10 fotos; apenas as primeiras foram selecionadas.'
+      );
+    } else {
+      $('uploadStatus').textContent = '';
+    }
 
-  photoInput.addEventListener(
-    'change',
-    () => {
+    files = chosen.slice(0, 10);
+    renderPhotos();
+  });
 
-      selectedFiles =
-        [...photoInput.files].slice(0, 10);
+  // Enviar checklist ou conferência
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
+    const plate = $('plate')
+      .value.trim().toUpperCase().replace('-', '');
+
+    const notes = $('notes').value.trim();
+
+    if (!plate) {
+      return status('uploadStatus', 'Informe a placa.');
+    }
+
+    if (!files.length) {
+      return status('uploadStatus', 'Selecione pelo menos uma foto.');
+    }
+
+    if (files.some((file) =>
+      !['image/jpeg', 'image/png'].includes(file.type) ||
+      file.size > 5 * 1024 * 1024 ||
+      !file.size
+    )) {
+      return status(
+        'uploadStatus',
+        'Envie JPG/PNG de até 5 MB por foto.'
+      );
+    }
+
+    const checklist = isChecklist();
+    const button = form.querySelector('[type="submit"]');
+
+    button.disabled = true;
+    $('uploadStatus').textContent = 'Enviando...';
+
+    try {
+      let endpoint = `${API_URL}/${basePath()}`;
+      let body;
+      const headers = {};
+
+      if (checklist) {
+        // Envia fotos para o backend
+ endpoint += '/upload';
+
+  body = new FormData();
+  body.append('placa', plate);
+  body.append('observacoes', notes);
+
+   files.forEach(file => {
+    body.append('fotos', file);
+});
+      } else {
+        // Conferência ainda não tem upload de fotos
+        body = JSON.stringify({
+          placa: plate,
+          observacoes: notes
+        });
+
+        headers['Content-Type'] = 'application/json';
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: ${await response.text()}`
+        );
+      }
+
+      status(
+        'uploadStatus',
+        checklist
+          ? `Checklist da placa ${plate} salvo com ${files.length} foto(s)!`
+          : `Conferência da placa ${plate} salva sem fotos (upload ainda não implementado).`,
+        true
+      );
+
+      form.reset();
+      files = [];
       renderPhotos();
 
-      uploadStatus.textContent = '';
+    } catch (error) {
+      console.error(error);
+
+      status(
+        'uploadStatus',
+        'Não foi possível salvar. Veja o console (F12).'
+      );
+
+    } finally {
+      button.disabled = false;
     }
-  );
-
-
-  // ==============================
-  // ENVIAR CHECKLIST / CONFERÊNCIA
-  // ==============================
-
-  uploadForm.addEventListener(
-    'submit',
-    async (event) => {
-
-      event.preventDefault();
-
-
-      const plate =
-        document.getElementById('plate')
-          .value
-          .trim()
-          .toUpperCase();
-
-
-      const notes =
-        document.getElementById('notes')
-          .value
-          .trim();
-
-
-      if (!plate) {
-
-        uploadStatus.textContent =
-          'Informe a placa da carreta.';
-
-        uploadStatus.style.color =
-          '#d94c4c';
-
-        return;
-      }
-
-
-      if (selectedFiles.length === 0) {
-
-        uploadStatus.textContent =
-          'Selecione pelo menos uma foto.';
-
-        uploadStatus.style.color =
-          '#d94c4c';
-
-        return;
-      }
-
-
-      const isChecklist =
-        currentAction === 'send-checklist';
-
-
-      const endpoint = isChecklist
-        ? `${API_URL}/checklists`
-        : `${API_URL}/conferencias`;
-
-
-      const body = {
-
-        placa: plate,
-
-        observacoes: notes
-
-      };
-
-
-      uploadStatus.textContent =
-        'Salvando...';
-
-      uploadStatus.style.color =
-        '#5d6b7b';
-
-
-      try {
-
-        const response =
-          await fetch(endpoint, {
-
-            method: 'POST',
-
-            headers: {
-              'Content-Type':
-                'application/json'
-            },
-
-            body: JSON.stringify(body)
-
-          });
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            'Erro ao salvar registro.'
-          );
-
-        }
-
-
-        const data =
-          await response.json();
-
-
-        console.log(
-          'Registro salvo:',
-          data
-        );
-
-
-        const type =
-          isChecklist
-            ? 'Checklist'
-            : 'Conferência';
-
-
-        uploadStatus.textContent =
-          `${type} da placa ${plate} enviado com sucesso!`;
-
-        uploadStatus.style.color =
-          '#1ea672';
-
-
-        uploadForm.reset();
-
-        selectedFiles = [];
-
-        renderPhotos();
-
-
-      } catch (error) {
-
-        console.error(error);
-
-        uploadStatus.textContent =
-          'Não foi possível salvar o registro.';
-
-        uploadStatus.style.color =
-          '#d94c4c';
-      }
-
-    }
-  );
-
+  });
 }
