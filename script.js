@@ -431,7 +431,7 @@ if ($('uploadForm')) {
                 `${API_URL}/${endpoint()}/upload`,
                 {
                     method: 'POST',
-                    credentials: 'include'
+                    credentials: 'include',
                     body
                 }
             );
